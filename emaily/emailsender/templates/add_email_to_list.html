@@ -1,26 +1,33 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-<div class="row mt-4">
-    <div class="col-md-8 offset-md-2">
-        <h3 class="text-center">Add Emails to List: {{ email_list.name }}</h3>
-        <form method="POST" action="{% url 'add_email_to_list' list_id=email_list.id %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="email_address">Email Address</label>
-                <input type="email" class="form-control" id="email_address" name="email_address" required>
-            </div>
-            <button type="submit" class="btn btn-success btn-block">Add Email</button>
-        </form>
+<div class="container mt-5">
+    <h2>Add Emails to "{{ email_list.name }}"</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
         
-        <h4 class="mt-4">Emails in this List:</h4>
-        <ul class="list-group">
-            {% for email in emails %}
-                <li class="list-group-item">{{ email.email_address }}</li>
-            {% empty %}
-                <li class="list-group-item">No emails in this list yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
+        <div class="form-group">
+            <label for="email_address">Add a Single Email:</label>
+            <input type="email" name="email_address" id="email_address" class="form-control" placeholder="Enter email address">
+        </div>
+
+        <div class="form-group">
+            <label for="csv_file">Or Upload a CSV File:</label>
+            <input type="file" name="csv_file" id="csv_file" class="form-control-file">
+            <small class="form-text text-muted">Upload a CSV file with a single column of email addresses. <a href="{% static "email.csv" %}">Get File Template</a></small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Add Emails</button>
+    </form>
+
+    <hr>
+    <h3>Existing Emails</h3>
+    <ul class="list-group">
+        {% for email in emails %}
+            <li class="list-group-item">{{ email.email_address }}</li>
+        {% empty %}
+            <li class="list-group-item">No emails added yet.</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

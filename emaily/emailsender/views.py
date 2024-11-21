@@ -4,6 +4,9 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from .models import EmailList, Email
 from django.utils.timezone import now, timedelta
+import csv
+from io import TextIOWrapper
+
 
 def homepage(request):
     """Render the homepage with an overview of the tool."""
@@ -55,22 +58,47 @@ def create_email_list(request):
     email_lists = EmailList.objects.filter(user=request.user)
     return render(request, 'createlist.html', {'email_lists': email_lists})
 
+
+
+
 @login_required
 def add_email_to_list(request, list_id):
     """Add emails to the selected email list of the logged-in user."""
     email_list = get_object_or_404(EmailList, id=list_id, user=request.user)
+    
     if request.method == 'POST':
+        # Handle individual email addition
         email_address = request.POST.get('email_address')
-        if Email.objects.filter(email_address=email_address, email_list=email_list).exists():
-            messages.error(request, "This email is already in the list.")
-        else:
-            Email.objects.create(email_list=email_list, email_address=email_address)
-            messages.success(request, "Email added successfully.")
-        return redirect('email_dashboard')  # Redirect to dashboard after adding email
+        if email_address:
+            if Email.objects.filter(email_address=email_address, email_list=email_list).exists():
+                messages.error(request, "This email is already in the list.")
+            else:
+                Email.objects.create(email_list=email_list, email_address=email_address)
+                messages.success(request, "Email added successfully.")
+        
+        # Handle CSV file upload
+        if 'csv_file' in request.FILES:
+            csv_file = request.FILES['csv_file']
+            try:
+                csv_reader = csv.reader(TextIOWrapper(csv_file.file, encoding='utf-8'))
+                for row in csv_reader:
+                    if len(row) > 0:  # Ensure the row is not empty
+                        email = row[0].strip()  # Get the first column as email
+                        if email and not Email.objects.filter(email_address=email, email_list=email_list).exists():
+                            Email.objects.create(email_list=email_list, email_address=email)
+                messages.success(request, "Emails added from CSV file successfully.")
+            except Exception as e:
+                messages.error(request, f"Error processing CSV file: {str(e)}")
+        
+        return redirect('add_email_to_list', list_id=list_id)
     
     # Fetch only the emails from the user's selected email list
     emails = email_list.emails.all()
     return render(request, 'add_email_to_list.html', {'email_list': email_list, 'emails': emails})
+
+
+
+
 
 @login_required
 def send_bulk_email(request):
