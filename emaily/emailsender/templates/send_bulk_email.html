@@ -1,0 +1,33 @@
+<h2>Send Bulk Email</h2>
+
+<!-- Display messages -->
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<!-- Form for sending emails -->
+<form method="post">
+    {% csrf_token %}
+    <label for="email_list">Select Email List:</label>
+    <select name="email_list" id="email_list" required>
+        <option value="">-- Select an Email List --</option>
+        {% for email_list in email_lists %}
+        <option value="{{ email_list.id }}">{{ email_list.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="from_email">Your Email:</label>
+    <input type="email" name="from_email" placeholder="Your Email" required>
+
+    <label for="subject">Subject:</label>
+    <input type="text" name="subject" placeholder="Subject" required>
+
+    <label for="message">Message:</label>
+    <textarea name="message" placeholder="Message" required></textarea>
+
+    <button type="submit">Send Emails</button>
+</form>

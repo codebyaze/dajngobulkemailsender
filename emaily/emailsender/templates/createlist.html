@@ -1,0 +1,12 @@
+<h2>Create Email List</h2>
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="List Name" required>
+    <button type="submit">Create</button>
+</form>
+<h3>Existing Lists</h3>
+<ul>
+    {% for email_list in email_lists %}
+    <li>{{ email_list.name }} - <a href="{% url 'add_email_to_list' email_list.id %}">Add Emails</a></li>
+    {% endfor %}
+</ul>

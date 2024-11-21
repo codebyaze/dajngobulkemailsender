@@ -1,0 +1,13 @@
+<h2>Add Emails to {{ email_list.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <input type="email" name="email_address" placeholder="Email Address" required>
+    <button type="submit">Add</button>
+</form>
+<h3>Emails in List</h3>
+<ul>
+    {% for email in emails %}
+    <li>{{ email.email_address }}</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'send_bulk_email' email_list.id %}">Send Emails to this List</a>
