@@ -2,36 +2,50 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Display success or error messages -->
-    {% if messages %}
-        <div class="alert-container">
-            {% for message in messages %}
-
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" >
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+    <!-- Welcome Section -->
     <div class="row">
-        <!-- Dashboard Header -->
-        <div class="col-12">
-            <h2>Welcome, {{ user.username }}!</h2>
-            <p class="lead">This is your email dashboard. Here you can manage your email lists and send bulk emails.</p>
+        <div class="col-12 text-center">
+            <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+            <p class="text-muted">Manage your email campaigns effortlessly with insights and tools.</p>
         </div>
     </div>
 
-    <!-- Dashboard Stats and Actions -->
-    <div class="row">
-        <!-- Email Lists Section -->
-        <div class="col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Email Lists</h4>
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Email Lists</h5>
+                    <p class="display-4">{{ email_lists.count }}</p>
+                    <a href="{% url 'create_email_list' %}" class="btn btn-outline-light btn-sm">Manage Lists</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Emails Sent</h5>
+                    <p class="display-4">{{ total_emails }}</p>
+                    <a href="{% url 'send_bulk_email' %}" class="btn btn-outline-light btn-sm">Send Emails</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card text-white bg-warning shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">New Emails Today</h5>
+                    <p class="display-4">{{ today_email_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="row mt-5">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Your Email Lists</h4>
                 </div>
                 <div class="card-body">
                     {% if email_lists %}
@@ -40,27 +54,25 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{ email_list.name }}
                                     <div class="btn-group">
-                                        <a href="{% url 'add_email_to_list' list_id=email_list.id %}" class="btn btn-sm btn-warning rounded-pill">Add Emails</a>
+                                        <a href="{% url 'add_email_to_list' list_id=email_list.id %}" class="btn btn-sm btn-warning">Add Emails</a>
                                     </div>
-                                    <span class="badge bg-primary rounded-pill text-light">{{ email_list.emails.count }} emails</span>
+                                    <span class="badge bg-primary rounded-pill">{{ email_list.emails.count }} emails</span>
                                 </li>
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p>No email lists found. Create one to get started!</p>
+                        <p class="text-center text-muted">No email lists found. <a href="{% url 'create_email_list' %}">Create one</a> to get started!</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Action Buttons Section -->
-        <div class="col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Actions</h4>
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Quick Actions</h4>
                 </div>
                 <div class="card-body text-center">
-                    <!-- Action Buttons -->
                     <a href="{% url 'create_email_list' %}" class="btn btn-success btn-lg mb-3">Add New List</a>
                     <br>
                     <a href="{% url 'send_bulk_email' %}" class="btn btn-primary btn-lg">Send Bulk Emails</a>
@@ -68,10 +80,53 @@
             </div>
         </div>
     </div>
+
+    <!-- Chart Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Email Sending Overview</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="emailsSentChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Bootstrap JavaScript for alert close button functionality -->
-{% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock %}
+<!-- Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Replace this data dynamically with your data from the server
+    const emailData = {{ email_counts|safe }};
+    const emailLabels = {{ email_dates|safe }};
+
+    const ctx = document.getElementById('emailsSentChart').getContext('2d');
+    const emailsSentChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: emailLabels,
+            datasets: [{
+                label: 'Emails Sent',
+                data: emailData,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Emails' } },
+                x: { title: { display: true, text: 'Date' } }
+            }
+        }
+    });
+</script>
 {% endblock %}

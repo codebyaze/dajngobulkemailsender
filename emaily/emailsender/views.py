@@ -3,32 +3,41 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from .models import EmailList, Email
+from django.utils.timezone import now, timedelta
+
+def homepage(request):
+    """Render the homepage with an overview of the tool."""
+    return render(request, 'homepage.html')
 
 @login_required
 def email_dashboard(request):
-    """Display the user's email dashboard."""
     user = request.user
-    
-    # Fetch the user's email lists and emails
     email_lists = EmailList.objects.filter(user=user)
     sent_emails = Email.objects.filter(user=user)
-    
-    # Count the total number of lists and emails
-    total_lists = email_lists.count()
-    total_emails = sent_emails.count()
-    
-    # Get a list of recent sent emails (optional, e.g., last 5)
-    recent_emails = sent_emails.order_by('-added_at')[:5]
-    
+
+    # Email counts for the last 7 days
+    email_data = []
+    date_labels = []
+    for i in range(6, -1, -1):  # Last 7 days
+        day = now() - timedelta(days=i)
+        date_labels.append(day.strftime('%Y-%m-%d'))
+        email_data.append(sent_emails.filter(added_at__date=day.date()).count())
+
+    # Today's email count
+    today_email_count = sent_emails.filter(added_at__date=now().date()).count()
+
     context = {
-        'total_lists': total_lists,
-        'total_emails': total_emails,
-        'recent_emails': recent_emails,
-        'email_lists': email_lists,  # for sidebar navigation if needed
-        'sent_emails': sent_emails,  # for showing email data
+        'email_lists': email_lists,
+        'email_dates': date_labels,
+        'email_counts': email_data,
+        'total_emails': sent_emails.count(),
+        'today_email_count': today_email_count,
     }
-    
     return render(request, 'email_dashboard.html', context)
+
+
+
+
 
 @login_required
 def create_email_list(request):
