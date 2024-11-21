@@ -1,33 +1,42 @@
-<h2>Send Bulk Email</h2>
+{% extends 'base.html' %}
 
-<!-- Display messages -->
-{% if messages %}
-<ul>
-    {% for message in messages %}
-    <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <h3 class="text-center">Send Bulk Email</h3>
+        <form method="POST" action="{% url 'send_bulk_email' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email_list">Select Email List</label>
+                <select class="form-control" id="email_list" name="email_list" required>
+                    {% for email_list in email_lists %}
+                        <option value="{{ email_list.id }}">{{ email_list.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" class="form-control" id="subject" name="subject" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="from_email">Your Email</label>
+                <input type="email" class="form-control" id="from_email" name="from_email" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Send Email</button>
+        </form>
+        {% if messages %}
+            <div class="alert alert-info mt-3">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
 
-<!-- Form for sending emails -->
-<form method="post">
-    {% csrf_token %}
-    <label for="email_list">Select Email List:</label>
-    <select name="email_list" id="email_list" required>
-        <option value="">-- Select an Email List --</option>
-        {% for email_list in email_lists %}
-        <option value="{{ email_list.id }}">{{ email_list.name }}</option>
-        {% endfor %}
-    </select>
 
-    <label for="from_email">Your Email:</label>
-    <input type="email" name="from_email" placeholder="Your Email" required>
-
-    <label for="subject">Subject:</label>
-    <input type="text" name="subject" placeholder="Subject" required>
-
-    <label for="message">Message:</label>
-    <textarea name="message" placeholder="Message" required></textarea>
-
-    <button type="submit">Send Emails</button>
-</form>
+{% endblock %}

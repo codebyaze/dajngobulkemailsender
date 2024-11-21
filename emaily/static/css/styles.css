@@ -1,0 +1,25 @@
+/* custom styles */
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+
+h2, h3 {
+    color: #007bff;
+}
+
+.btn {
+    border-radius: 50px;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+}
+
+.list-group-item {
+    background-color: #ffffff;
+}
+
+.container {
+    margin-top: 20px;
+}

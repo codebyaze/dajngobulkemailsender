@@ -1,12 +1,24 @@
-<h2>Create Email List</h2>
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="name" placeholder="List Name" required>
-    <button type="submit">Create</button>
-</form>
-<h3>Existing Lists</h3>
-<ul>
-    {% for email_list in email_lists %}
-    <li>{{ email_list.name }} - <a href="{% url 'add_email_to_list' email_list.id %}">Add Emails</a></li>
-    {% endfor %}
-</ul>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+        <h2 class="text-center">Create Email List</h2>
+        <form method="POST" action="{% url 'create_email_list' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="list_name">Email List Name</label>
+                <input type="text" class="form-control" id="list_name" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Create List</button>
+        </form>
+        {% if messages %}
+            <div class="alert alert-info mt-3">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

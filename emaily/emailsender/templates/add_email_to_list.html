@@ -1,13 +1,26 @@
-<h2>Add Emails to {{ email_list.name }}</h2>
-<form method="post">
-    {% csrf_token %}
-    <input type="email" name="email_address" placeholder="Email Address" required>
-    <button type="submit">Add</button>
-</form>
-<h3>Emails in List</h3>
-<ul>
-    {% for email in emails %}
-    <li>{{ email.email_address }}</li>
-    {% endfor %}
-</ul>
-<a href="{% url 'send_bulk_email' email_list.id %}">Send Emails to this List</a>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <h3 class="text-center">Add Emails to List: {{ email_list.name }}</h3>
+        <form method="POST" action="{% url 'add_email_to_list' list_id=email_list.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email_address">Email Address</label>
+                <input type="email" class="form-control" id="email_address" name="email_address" required>
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Add Email</button>
+        </form>
+        
+        <h4 class="mt-4">Emails in this List:</h4>
+        <ul class="list-group">
+            {% for email in emails %}
+                <li class="list-group-item">{{ email.email_address }}</li>
+            {% empty %}
+                <li class="list-group-item">No emails in this list yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
