@@ -10,7 +10,7 @@ def register_user(request):
             user = form.save()
             login(request, user)
             messages.success(request, "Registration successful.")
-            return redirect('send_bulk_email')
+            return redirect('email_dashboard')	
         else:
             messages.error(request, "Registration failed. Please correct the errors.")
     else:
@@ -25,7 +25,7 @@ def login_user(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, "Login successful.")
-            return redirect('send_bulk_email')
+            return redirect('email_dashboard')
         else:
             messages.error(request, "Login failed. Please check your username and password.")
     else:
